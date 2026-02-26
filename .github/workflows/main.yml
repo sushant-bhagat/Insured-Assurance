@@ -1,34 +1,36 @@
+Add the below YAML:
 
-# to write any comment use # in YAML
-
-name: This is our first workflow
-
-# next we write what will trigger this workflow 
-on:
-  push:
-    branches: [ "main"]
-  pull_request:
-    branches: ["main"]
-  workflow_dispatch:   # this mean the workflow will be executed by you manually
-jobs:
-  job1:   # this is job name 
-    runs-on: ubuntu-latest   # give the name of OS runner where the job will be executed
-    steps:
-     - name: Run a single command 
-       run: echo hello World! 
-     - name: Run a set of commands 
-       run: |    # use | symbol to pass set of commands to run function
-         echo hello to github 
-         echo test
-  job2:
+# deploy
+name: CICD using maven and SL lab 
+on: 
+ push: 
+   branches: ["main"]
+ workflow_dispatch: 
+jobs: 
+  buildandDeploy:
     runs-on: ubuntu-latest
-    steps:
-     - uses: actions/checkout@v4  # it will clone the current repo on the ubuntu runner
-  job3: 
-    runs-on: ubuntu-latest
-    steps:
-     - name: Execute set of commands
-       run: |
-        echo job3 execution
-        echo githubactions 
-
+    steps: 
+    - name: Clone the Repo 
+      uses: actions/checkout@v4 
+    - name: Setup JDK 21 and maven 
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'temurin'
+        java-version: '21'
+        cache: 'maven'
+    - name: Build with Maven 
+      run: mvn -B package --file pom.xml 
+    - name: connect to Lab and deploy code on tomcat
+      uses: cross-the-world/ssh-scp-ssh-pipelines@latest
+      with:
+       host: '10.232.112.164'
+       user: 'Sushant'
+       pass: 'Lancelot'
+       port: 3389
+       connect_timeout: 10s
+       first_ssh: |
+          sudo chmod 777 /tpm/
+       scp: |
+          './target/*war' => /tmp/
+       last_ssh: |
+          sudo systemctl restart tomcat.service 
