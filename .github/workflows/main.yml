@@ -1,4 +1,4 @@
-Add the below YAML:
+#Add the below YAML:
 
 # deploy
 name: CICD using maven and SL lab 
