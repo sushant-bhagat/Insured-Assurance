@@ -29,8 +29,10 @@ jobs:
        port: 3389
        connect_timeout: 10s
        first_ssh: |
-          sudo chmod 777 /tmp/
+          sudo chmod 777 /opt/tomcat/webapps
+
        scp: |
-          './target/*war' => /tmp/
+          './target/*war' => /opt/tomcat/webapps
+
        last_ssh: |
           sudo systemctl restart tomcat.service 
